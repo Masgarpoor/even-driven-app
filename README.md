@@ -1,1 +1,1 @@
-# even-driven-app
+# event-driven-app
