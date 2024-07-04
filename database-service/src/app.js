@@ -8,7 +8,7 @@ const app = express();
 
 app.use(express.json());
 
-app.use("/api/host", connectionRouter);
+app.use("/api", connectionRouter);
 
 mongoose
   .connect("mongodb://localhost:27017/connections_db")
