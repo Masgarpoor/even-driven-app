@@ -42,6 +42,21 @@ services:
       - kafka
       - influxdb
 
+  query-service:
+    build: ./query-service
+    container_name: query-service
+    environment:
+      - INFLUXDB_HOST=influxdb
+      - INFLUXDB_PORT=8086
+      - INFLUXDB_DB=test_db
+      - INFLUXDB_USER=username
+      - INFLUXDB_PASSWORD=password
+      - PORT=3004
+    ports:
+      - "3004:3004"
+    depends_on:
+      - influxdb
+
   mongo:
     image: mongo:latest
     container_name: mongo
