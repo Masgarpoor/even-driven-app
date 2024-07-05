@@ -77,4 +77,28 @@ export default class ConnectionController {
       });
     }
   }
+
+  static async existConnection(req, res) {
+    try {
+      const { connection_name } = req.params;
+
+      const connection = await Connection.findOne({ connection_name });
+      if (connection) {
+        res.status(200).json({
+          success: true,
+          messsage: "Connection Found!",
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: "Connection Not Found!",
+        });
+      }
+    } catch (error) {
+      res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
 }

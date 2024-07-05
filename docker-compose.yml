@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   database-service:
@@ -24,6 +24,24 @@ services:
     depends_on:
       - kafka
 
+  kafka-consumer-service:
+    build: ./kafka-consumer-service
+    container_name: kafka-consumer-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_TOPIC=test_topic
+      - INFLUXDB_HOST=influxdb
+      - INFLUXDB_PORT=8086
+      - INFLUXDB_DB=test_db
+      - INFLUXDB_USER=username
+      - INFLUXDB_PASSWORD=password
+
+    ports:
+      - "3003:3003"
+    depends_on:
+      - kafka
+      - influxdb
+
   mongo:
     image: mongo:latest
     container_name: mongo
@@ -47,3 +65,9 @@ services:
     container_name: zookeeper
     ports:
       - "2181:2181"
+      
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    ports:
+      - "8086:8086"
