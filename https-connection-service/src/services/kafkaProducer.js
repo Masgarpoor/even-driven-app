@@ -2,7 +2,7 @@ import kafka from "kafka-node";
 import { v4 as uuidv4 } from "uuid";
 
 const client = new kafka.KafkaClient({
-  kafkaHost: process.env.KAFKA_BROKER || "localhost:9092",
+  kafkaHost: "kafka:9092",
 });
 const producer = new kafka.Producer(client);
 
@@ -18,7 +18,7 @@ function sendDataToKafka(data) {
   return new Promise((resolve, reject) => {
     const message = [
       {
-        topic: process.env.KAFKA_TOPIC || "data_topic",
+        topic: "test_topic",
         messages: JSON.stringify({ ...data, id: uuidv4(), tag: "received" }),
         partition: 0,
       },
