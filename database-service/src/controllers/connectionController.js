@@ -4,7 +4,8 @@ export default class ConnectionController {
   // Create new Connection
   static async createConnection(req, res) {
     try {
-      const { connection_name, parameters } = req.body;
+      const { connection_name } = req.params;
+      const { parameters } = req.body;
       const newConnection = new Connection({ connection_name, parameters });
 
       await newConnection.save();
@@ -23,37 +24,53 @@ export default class ConnectionController {
 
   // Update Connection
   static async updateConnection(req, res) {
-    const { id } = req.params;
-    const { connection_name, parameters } = req.body;
+    const { connection_name } = req.params;
+    const { new_connection_name, parameters } = req.body;
     const updated_at = Date.now();
 
-    if (connection_name && parameters) {
-      try {
-        const updatedConnection = await Connection.findByIdAndUpdate(
-          id,
-          {
-            connection_name,
+    if (!new_connection_name || !parameters) {
+      return res.status(400).json({
+        success: false,
+        message: "Please send New Connection Name and Parameters.",
+      });
+    }
+
+    if (new_connection_name === connection_name) {
+      return res.status(400).json({
+        success: false,
+        message: "Please send new connection name.",
+      });
+    }
+
+    try {
+      const updatedConnection = await Connection.findOneAndUpdate(
+        { connection_name },
+        {
+          $set: {
+            connection_name: new_connection_name,
             parameters,
             updated_at,
           },
-          { new: true }
-        );
+        },
+        { new: true }
+      );
 
+      if (updatedConnection) {
         res.status(200).json({
           success: true,
           body: updatedConnection,
           message: "The connection updated.",
         });
-      } catch (error) {
-        res.status(500).json({
+      } else {
+        res.status(404).json({
           success: false,
-          message: error.message,
+          message: "Connection Not Found to Update.",
         });
       }
-    } else {
-      res.status(400).json({
+    } catch (error) {
+      res.status(500).json({
         success: false,
-        message: "Please send Connection Name and parameters.",
+        message: error.message,
       });
     }
   }
@@ -61,17 +78,28 @@ export default class ConnectionController {
   // Delete connection
   static async deleteConnection(req, res) {
     try {
-      const { id } = req.params;
-      const deletedConnection = await Connection.findByIdAndDelete(id, {
-        new: true,
-      });
-      res.status(200).json({
-        success: true,
-        body: deletedConnection,
-        message: "Connection deleted.",
-      });
+      const { connection_name } = req.params;
+      const deletedConnection = await Connection.findOneAndDelete(
+        { connection_name },
+        {
+          new: true,
+        }
+      );
+
+      if (deletedConnection) {
+        res.status(200).json({
+          success: true,
+          body: deletedConnection,
+          message: "Connection deleted.",
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: "Connection Not Found to delete.",
+        });
+      }
     } catch (error) {
-      res.status(400).json({
+      res.status(500).json({
         success: false,
         message: error.message,
       });
@@ -89,10 +117,7 @@ export default class ConnectionController {
           messsage: "Connection Found!",
         });
       } else {
-        res.status(404).json({
-          success: false,
-          message: "Connection Not Found!",
-        });
+        throw new Error("Connection Not Found");
       }
     } catch (error) {
       res.status(404).json({

@@ -1,7 +1,7 @@
 import Influx from "influx";
 
 const influx = new Influx.InfluxDB({
-  host: "localhost",
+  host: "influxdb",
   port: "8086",
   database: "test_db",
   username: "username",

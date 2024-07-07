@@ -1,6 +1,21 @@
 version: "3.8"
 
 services:
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    environment:
+      - DATABASE_SERVICE_URL=http://database-service:3001
+      - HTTPS_CONNECTION_SERVICE_URL=http://https-connection-service:3002
+      - QUERY_SERVICE_URL=http://query-service:3004
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database-service
+      - https-connection-service
+      - query-service
+
   database-service:
     build: ./database-service
     container_name: database-service
@@ -35,7 +50,6 @@ services:
       - INFLUXDB_DB=test_db
       - INFLUXDB_USER=username
       - INFLUXDB_PASSWORD=password
-
     ports:
       - "3003:3003"
     depends_on:
@@ -63,6 +77,18 @@ services:
     ports:
       - "27017:27017"
 
+  mongo-express:
+    image: mongo-express:1.0.2-20-alpine3.19
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+    depends_on:
+      - mongo
+
   kafka:
     image: wurstmeister/kafka:latest
     container_name: kafka
@@ -80,9 +106,31 @@ services:
     container_name: zookeeper
     ports:
       - "2181:2181"
-      
+
   influxdb:
     image: influxdb:1.8
     container_name: influxdb
     ports:
       - "8086:8086"
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    container_name: kafdrop
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: kafka:9092
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      SERVER_PORT: 9000
+    depends_on:
+      - kafka
+
+  chronograf:
+    image: chronograf:1.8
+    container_name: chronograf
+    ports:
+      - "8888:8888"
+    depends_on:
+      - influxdb
+    environment:
+      INFLUXDB_URL: http://influxdb:8086

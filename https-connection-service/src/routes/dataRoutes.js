@@ -5,6 +5,10 @@ import dataController from "../controllers/dataController.js";
 
 const router = Router();
 
-router.post("/data", validateDataFormat, dataController.receiveData);
+router.post(
+  "/:connection_name/data",
+  validateDataFormat,
+  dataController.receiveData
+);
 
 export default router;

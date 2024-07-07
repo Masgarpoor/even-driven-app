@@ -1,18 +1,18 @@
 {
-  "name": "query-service",
+  "name": "gatway-api",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.js",
+  "main": "sever.js",
   "type": "module",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^16.4.5",
+    "axios": "^1.7.2",
     "express": "^4.19.2",
-    "influx": "^5.9.3"
+    "node-cache": "^5.1.2"
   }
 }
