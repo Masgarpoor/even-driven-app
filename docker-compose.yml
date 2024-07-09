@@ -84,8 +84,6 @@ services:
       - "8081:8081"
     environment:
       ME_CONFIG_MONGODB_SERVER: mongo
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: example
     depends_on:
       - mongo
 
@@ -112,6 +110,10 @@ services:
     container_name: influxdb
     ports:
       - "8086:8086"
+    environment:
+      INFLUXDB_ADMIN_USER: username
+      INFLUXDB_ADMIN_PASSWORD: password
+      INFLUXDB_DB: test_db
 
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
@@ -134,3 +136,5 @@ services:
       - influxdb
     environment:
       INFLUXDB_URL: http://influxdb:8086
+      INFLUXDB_USERNAME: username
+      INFLUXDB_PASSWORD: password

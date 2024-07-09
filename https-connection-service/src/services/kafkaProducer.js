@@ -1,36 +1,44 @@
-import kafka from "kafka-node";
+import {Kafka} from "kafkajs";
 import { v4 as uuidv4 } from "uuid";
 
-const client = new kafka.KafkaClient({
-  kafkaHost: "kafka:9092",
-});
-const producer = new kafka.Producer(client);
+const CLIENT = process.env.CLIENT || "https-connection-service";
+const KAFKA_BROKER = process.env.KAFKA_BROKER || "kafka:9092";
 
-producer.on("ready", () => {
-  console.log("Kafka Producer is connected and ready.");
-});
+const kafka = new Kafka({ clientId: CLIENT, brokers: [KAFKA_BROKER] });
+const producer = kafka.producer();
 
-producer.on("error", (err) => {
-  console.error("Kafka Producer connection error:", err);
-});
+export async function connectProducer() {
+  try {
+    await producer.connect();
+    console.log("Kafka Producer is connected and ready.");
+  } catch (error) {
+    console.error("Kafka Producer connection error:", error.message);
+  }
+}
 
-function sendDataToKafka(data) {
-  return new Promise((resolve, reject) => {
-    const message = [
+export async function sendDataToKafka(data) {
+  try {
+    const topic = process.env.KAFKA_TOPIC || "test_topic";
+    const messages = [
       {
-        topic: "test_topic",
-        messages: JSON.stringify({ ...data, id: uuidv4(), tag: "received" }),
-        partition: 0,
+        key: uuidv4(),
+        value: JSON.stringify({
+          ...data,
+          id: uuidv4(),
+          tag: "received",
+        }),
       },
     ];
 
-    producer.send(message, (err, data) => {
-      if (err) {
-        return reject(err);
-      }
-      resolve(data);
-    });
-  });
+    const payloads = {
+      topic,
+      messages,
+    };
+
+    await producer.send(payloads);
+    console.log("Message sent to Kafka:", payloads);
+  } catch (error) {
+    console.error("Failed to send message to Kafka:", error.message);
+  }
 }
 
-export default sendDataToKafka;

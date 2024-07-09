@@ -1,3 +1,5 @@
+import Joi from "joi";
+
 function validateDataFormat(req, res, next) {
   if (req.headers["content-type"] !== "application/json") {
     res.status(400).json({
@@ -5,14 +7,22 @@ function validateDataFormat(req, res, next) {
       message: "Invalid Content-Type. Expected application/json",
     });
   }
+  const schema = Joi.object({
+    name: Joi.string().required(),
+    value: Joi.string().required(),
+    ts: Joi.number().integer().required(),
+  });
 
-  const { name, value, ts } = req.body;
-  if (
-    typeof name === "string" &&
-    typeof value === "string" &&
-    typeof ts === "number"
-  ) {
+  const data = req.body;
+  const { error } = schema.validate(data);
+
+  if (!error) {
     next();
+  } else {
+    res.status(400).json({
+      success: false,
+      message: "Invalid data format.",
+    });
   }
 }
 

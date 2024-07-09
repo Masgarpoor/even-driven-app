@@ -11,7 +11,9 @@ app.use(express.json());
 app.use("/api/connections", connectionRouter);
 
 mongoose
-  .connect("mongodb://mongo:27017/connections_db")
+  .connect(
+    `mongodb://mongo:27017/connections_db`
+  )
   .then(() => {
     console.log("Connected to MongoDB");
   })
