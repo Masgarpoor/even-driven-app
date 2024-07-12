@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const NUMBER_OF_CONNECTIONS = 10;
+const NUMBER_OF_CONNECTIONS = 1;
 const RATE = 100; // 100 ms interval, 10 data per second
 
 const generateConnectionNames = (numberOfConnection) => {
@@ -43,14 +43,14 @@ async function sendConnection() {
     };
     try {
       await axios.post(
-        `http://localhost:3000/api/connections/${connectionName}`,
+        `https://localhost:3000/api/connections/${connectionName}`,
         parameters
       );
       console.log(`Connection ${connectionName} send to MongoDB with ${pid}`);
     } catch (error) {
       console.log(
         `Failed to send connection ${connectionName}:`,
-        error.response.data
+        error
       );
     }
   }
@@ -66,7 +66,7 @@ async function sendData() {
     const data = generateRandomDate();
     try {
       await axios.post(
-        `http://localhost:3000/api/${connectionName}/data`,
+        `https://localhost:3000/api/${connectionName}/data`,
         data
       );
       console.log(
@@ -82,7 +82,7 @@ async function sendData() {
   console.log(`Time to send data: ${end}`);
 }
 
-// sendConnection()
+sendConnection()
 // sendData();
 
-console.log(new Date('2024-07-12T00:05:51.300Z').getTime());
+

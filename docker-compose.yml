@@ -9,6 +9,8 @@ services:
       - HTTPS_CONNECTION_SERVICE_URL=http://https-connection-service:3002
       - QUERY_SERVICE_URL=http://query-service:3004
       - PORT=3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     ports:
       - "3000:3000"
     depends_on:
@@ -78,7 +80,6 @@ services:
       - "27017:27017"
     command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
 
-
   mongo-express:
     image: mongo-express:1.0.2-20-alpine3.19
     container_name: mongo-express
@@ -140,3 +141,9 @@ services:
       INFLUXDB_URL: http://influxdb:8086
       INFLUXDB_USERNAME: username
       INFLUXDB_PASSWORD: password
+      
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
