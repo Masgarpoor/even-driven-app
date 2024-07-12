@@ -25,27 +25,27 @@ import app from "./app.js";
 // }
 
 
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`API Gateway started and running on port ${PORT}`);
-  });
+  // const PORT = process.env.PORT || 3000;
+  // app.listen(PORT, () => {
+  //   console.log(`API Gateway started and running on port ${PORT}`);
+  // });
 
 
-// import fs from "fs";
-// import https from "https";
-// import { fileURLToPath } from "url";
-// import path from "path";
+import fs from "fs";
+import https from "https";
+import { fileURLToPath } from "url";
+import path from "path";
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// const PORT = process.env.PORT || 3000;
-// const httpsOptions = {
-//   key: fs.readFileSync(path.join(__dirname, "/security/key.pem")),
-//   cert: fs.readFileSync(path.join(__dirname, "/security/cert.pem")),
-// };
+const PORT = process.env.PORT || 3000;
+const httpsOptions = {
+  key: fs.readFileSync(path.join(__dirname, "/security/key.pem")),
+  cert: fs.readFileSync(path.join(__dirname, "/security/cert.pem")),
+};
 
-// const httpsServer = https.createServer(httpsOptions, app);
-// httpsServer.listen(PORT, () => {
-//   console.log(`API Gatway Service is running on port ${PORT}`);
-// });
+const httpsServer = https.createServer(httpsOptions, app);
+httpsServer.listen(PORT, () => {
+  console.log(`API Gatway Service is running on port ${PORT}`);
+});

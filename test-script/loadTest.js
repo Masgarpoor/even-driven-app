@@ -1,7 +1,11 @@
 import axios from "axios";
+import https from "https";
 
-const NUMBER_OF_CONNECTIONS = 1;
+const NUMBER_OF_CONNECTIONS = 30;
 const RATE = 100; // 100 ms interval, 10 data per second
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+});
 
 const generateConnectionNames = (numberOfConnection) => {
   return Array.from(
@@ -44,13 +48,14 @@ async function sendConnection() {
     try {
       await axios.post(
         `https://localhost:3000/api/connections/${connectionName}`,
-        parameters
+        parameters,
+        { httpsAgent }
       );
       console.log(`Connection ${connectionName} send to MongoDB with ${pid}`);
     } catch (error) {
       console.log(
         `Failed to send connection ${connectionName}:`,
-        error
+        error.response.data
       );
     }
   }
@@ -75,14 +80,15 @@ async function sendData() {
         )} send to https-connection-service with ${pid} by ${connectionName}`
       );
     } catch (error) {
-      console.log(`Failed to send data ${JSON.stringify(data)} by ${connectionName}:`, error.response.data);
+      console.log(
+        `Failed to send data ${JSON.stringify(data)} by ${connectionName}:`,
+        error.response
+      );
     }
   }
   const end = Date.now() - start;
   console.log(`Time to send data: ${end}`);
 }
 
-sendConnection()
-// sendData();
-
-
+sendConnection();
+sendData();

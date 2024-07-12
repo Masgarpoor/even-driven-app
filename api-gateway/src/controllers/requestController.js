@@ -16,9 +16,8 @@ export default class RequestController {
     try {
       const jobData = {
         method: req.method,
-        url: `http://localhost:3001/api${req.url}`,
+        url: `${process.env.DATABASE_SERVICE_URL}/api${req.url}`,
         data: req.body,
-        headers: req.headers,
       };
       console.log('Job data is:', jobData);
 
@@ -34,9 +33,8 @@ export default class RequestController {
     try {
       const jobData = {
         method: req.method,
-        url: `http://localhost:3002/api${req.url}`,
+        url: `${process.env.HTTPS_CONNECTION_SERVICE_URL}/api${req.url}`,
         data: req.body,
-        headers: req.headers,
       };
       console.log('Job data is:', jobData);
 
@@ -53,9 +51,8 @@ export default class RequestController {
       const query = new URLSearchParams(req.query).toString();
       const jobData = {
         method: req.method,
-        url: `http://localhost:3004/api${req.url}?${query}`,
+        url: `${process.env.QUERY_SERVICE_URL}/api${req.url}?${query}`,
         data: req.body,
-        headers: req.headers,
       };
       console.log('Job data is:', jobData);
 
