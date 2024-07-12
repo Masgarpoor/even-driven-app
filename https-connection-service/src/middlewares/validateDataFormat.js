@@ -8,7 +8,7 @@ function validateDataFormat(req, res, next) {
     });
   }
   const schema = Joi.object({
-    name: Joi.string().required(),
+    name: Joi.string().pattern(/^[a-zA-Z0-9_]+$/).required(),
     value: Joi.string().required(),
     ts: Joi.number().integer().required(),
   });

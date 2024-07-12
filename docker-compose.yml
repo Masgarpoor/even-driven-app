@@ -76,6 +76,8 @@ services:
     container_name: mongo
     ports:
       - "27017:27017"
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+
 
   mongo-express:
     image: mongo-express:1.0.2-20-alpine3.19

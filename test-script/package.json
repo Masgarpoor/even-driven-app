@@ -1,18 +1,17 @@
 {
-  "name": "gatway-api",
+  "name": "test-script",
   "version": "1.0.0",
   "description": "",
-  "main": "sever.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/server.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.7.2",
-    "express": "^4.19.2",
-    "node-cache": "^5.1.2"
+    "loadtest": "^8.0.9"
   }
 }

@@ -1,17 +1,4 @@
-import axios from "axios";
-
-import { sendDataToKafka, connectProducer } from "../services/kafkaProducer.js";
-
-// Connectt producer to kafka
-const connectProducerToKafka = async () => {
-  try {
-    await connectProducer();
-  } catch (error) {
-    console.log(error.message);
-  }
-};
-
-connectProducerToKafka();
+import { sendDataToKafka } from "../services/kafkaProducer.js";
 
 export default class DataController {
   static async receiveData(req, res) {
@@ -24,7 +11,13 @@ export default class DataController {
         value,
         ts,
       };
-      await sendDataToKafka(data);
+      const result = await sendDataToKafka(data);
+
+      if (result.success) {
+        res.status(200).json(result)
+      }else {
+        res.status(500).json(result)
+      }
     } catch (error) {
       res.status(500).json({
         success: false,
