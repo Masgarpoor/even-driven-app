@@ -1,11 +1,16 @@
 import axios from "axios";
 import https from "https";
 
-const NUMBER_OF_CONNECTIONS = 30;
+import chalk from "chalk";
+
+const NUMBER_OF_CONNECTIONS = 10;
 const RATE = 100; // 100 ms interval, 10 data per second
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false,
 });
+
+const success = chalk.bold.green;
+const faild = chalk.bold.red;
 
 const generateConnectionNames = (numberOfConnection) => {
   return Array.from(
@@ -30,65 +35,71 @@ const generateRandomTimeStamp = () => {
 
 const generateRandomDate = () => {
   const nameList = ["temperature", "humidity"];
+  const ts = new Date().getTime();
+
   return {
     name: `${nameList[Math.floor(Math.random() * nameList.length)]}`,
     value: (Math.random() * 100).toFixed(2),
-    ts: generateRandomTimeStamp(),
+    ts,
   };
 };
 
-async function sendConnection() {
-  const connectionNames = generateConnectionNames(NUMBER_OF_CONNECTIONS);
-  const start = Date.now();
-  for (let connectionName of connectionNames) {
-    const pid = process.pid;
-    const parameters = {
-      parameters: generateParameters(),
-    };
-    try {
-      await axios.post(
-        `https://localhost:3000/api/connections/${connectionName}`,
-        parameters,
-        { httpsAgent }
-      );
-      console.log(`Connection ${connectionName} send to MongoDB with ${pid}`);
-    } catch (error) {
-      console.log(
-        `Failed to send connection ${connectionName}:`,
-        error.response.data
-      );
-    }
-  }
-  const end = Date.now() - start;
-  console.log(`Time to send connections: ${end}`);
-}
+const sendRequest = async (url, data) => {
+  try {
+    const response = await axios.post(url, data, { httpsAgent });
 
-async function sendData() {
-  const connectionNames = generateConnectionNames(NUMBER_OF_CONNECTIONS);
-  const start = Date.now();
-  for (let connectionName of connectionNames) {
-    const pid = process.pid;
-    const data = generateRandomDate();
-    try {
-      await axios.post(
-        `https://localhost:3000/api/${connectionName}/data`,
-        data
-      );
-      console.log(
-        `Data ${JSON.stringify(
-          data
-        )} send to https-connection-service with ${pid} by ${connectionName}`
-      );
-    } catch (error) {
-      console.log(
-        `Failed to send data ${JSON.stringify(data)} by ${connectionName}:`,
-        error.response
-      );
-    }
+    console.log(
+      success(`Request sent and recieved ${JSON.stringify(response.data)}`)
+    );
+  } catch (error) {
+    console.error(
+      faild(
+        `Failed to send request to ${url}:`,
+        JSON.stringify(error.response.data)
+      )
+    );
   }
-  const end = Date.now() - start;
-  console.log(`Time to send data: ${end}`);
-}
+};
 
-sendConnection();
-sendData();
+const query = async () => {
+  const startTime = "1403-04-23T01:00:00";
+  const endTime = "1403-04-23T02:00:00";
+  const name = "temperature";
+  const connectionName = "connection_84";
+
+  try {
+    const response = await axios.get(
+      `https://localhost:3000/api/${connectionName}/data?startTime=${startTime}&endTime=${endTime}&name=${name}`,
+      { httpsAgent }
+    );
+    const result = response.data.body;
+    
+    console.log(success(`Query sent and recieved :`));
+    console.table(result);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const main = () => {
+  const connectionNames = generateConnectionNames(NUMBER_OF_CONNECTIONS);
+
+  setInterval(async () => {
+    for (let connectionName of connectionNames) {
+      const connectionUrl = `https://localhost:3000/api/connections/${connectionName}`;
+      const dataUrl = `https://localhost:3000/api/${connectionName}/data`;
+
+      const connectionParam = { parameters: generateParameters() };
+      const requestData = generateRandomDate();
+
+      await sendRequest(connectionUrl, connectionParam);
+      await sendRequest(dataUrl, requestData);
+
+      // Adding delay between each connection request
+      await new Promise((resolve) => setTimeout(resolve, RATE));
+    }
+  }, RATE);
+};
+
+// main();
+query();

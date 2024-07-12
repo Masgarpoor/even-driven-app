@@ -19,7 +19,7 @@ export default class RequestController {
         url: `${process.env.DATABASE_SERVICE_URL}/api${req.url}`,
         data: req.body,
       };
-      console.log('Job data is:', jobData);
+      console.log("Job data is:", jobData);
 
       const result = await addJobToQueue(jobData);
       res.status(200).json(result);
@@ -36,7 +36,7 @@ export default class RequestController {
         url: `${process.env.HTTPS_CONNECTION_SERVICE_URL}/api${req.url}`,
         data: req.body,
       };
-      console.log('Job data is:', jobData);
+      console.log("Job data is:", jobData);
 
       const result = await addJobToQueue(jobData);
       res.status(200).json(result);
@@ -49,12 +49,14 @@ export default class RequestController {
   static async queryRequest(req, res) {
     try {
       const query = new URLSearchParams(req.query).toString();
+      const { connection_name } = req.params;
+
       const jobData = {
         method: req.method,
-        url: `${process.env.QUERY_SERVICE_URL}/api${req.url}?${query}`,
+        url: `${process.env.QUERY_SERVICE_URL}/api/${connection_name}/data?${query}`,
         data: req.body,
       };
-      console.log('Job data is:', jobData);
+      console.log("Job data is:", jobData);
 
       const result = await addJobToQueue(jobData);
       res.status(200).json(result);
@@ -85,6 +87,8 @@ export default class RequestController {
     }
   }
 }
+
+
 // export default class RequestController {
 //   // database-servicev
 //   static async connectionsRequest(req, res) {

@@ -9,8 +9,6 @@ services:
       - HTTPS_CONNECTION_SERVICE_URL=http://https-connection-service:3002
       - QUERY_SERVICE_URL=http://query-service:3004
       - PORT=3000
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
     ports:
       - "3000:3000"
     depends_on:
@@ -22,7 +20,7 @@ services:
     build: ./database-service
     container_name: database-service
     environment:
-      - MONGO_URI=mongodb://mongo:27017/connections_db
+      - MONGO_URI=mongodb://mongo:27017/connections_db?replicaSet=rs0
       - PORT=3001
     ports:
       - "3001:3001"
@@ -141,9 +139,3 @@ services:
       INFLUXDB_URL: http://influxdb:8086
       INFLUXDB_USERNAME: username
       INFLUXDB_PASSWORD: password
-      
-  redis:
-    image: redis:latest
-    container_name: redis
-    ports:
-      - "6379:6379"
