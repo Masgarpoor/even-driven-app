@@ -1,7 +1,7 @@
 import axios from "axios";
 import NodeCache from "node-cache";
 
-const DATABASE_SERVICE_URI = "http://database-service:3001"; // or use your actual database service URI
+const DATABASE_SERVICE_URI = process.env.DATABASE_SERVICE_URL || "http://database-service:3001"; // or use your actual database service URI
 const connectionCache = new NodeCache({ stdTTL: 3600 });
 
 async function checkConnectionExists(req, res, next) {

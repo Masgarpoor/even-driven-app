@@ -73,7 +73,7 @@ const query = async () => {
       { httpsAgent }
     );
     const result = response.data.body;
-    
+
     console.log(success(`Query sent and recieved :`));
     console.table(result);
   } catch (error) {
@@ -102,4 +102,4 @@ const main = () => {
 };
 
 // main();
-query();
+// query();
