@@ -1,75 +1,75 @@
 version: "3.8"
 
 services:
-  api-gateway:
-    build: ./api-gateway
-    container_name: api-gateway
-    environment:
-      - DATABASE_SERVICE_URL=http://database-service:3001
-      - HTTPS_CONNECTION_SERVICE_URL=http://https-connection-service:3002
-      - QUERY_SERVICE_URL=http://query-service:3004
-      - PORT=3000
-    ports:
-      - "3000:3000"
-    depends_on:
-      - database-service
-      - https-connection-service
-      - query-service
+  # api-gateway:
+  #   build: ./api-gateway
+  #   container_name: api-gateway
+  #   environment:
+  #     - DATABASE_SERVICE_URL=http://database-service:3001
+  #     - HTTPS_CONNECTION_SERVICE_URL=http://https-connection-service:3002
+  #     - QUERY_SERVICE_URL=http://query-service:3004
+  #     - PORT=3000
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - database-service
+  #     - https-connection-service
+  #     - query-service
 
-  database-service:
-    build: ./database-service
-    container_name: database-service
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/connections_db?replicaSet=rs0
-      - PORT=3001
-    ports:
-      - "3001:3001"
-    depends_on:
-      - mongo
+  # database-service:
+  #   build: ./database-service
+  #   container_name: database-service
+  #   environment:
+  #     - MONGO_URI=mongodb://mongo:27017/connections_db?replicaSet=rs0
+  #     - PORT=3001
+  #   ports:
+  #     - "3001:3001"
+  #   depends_on:
+  #     - mongo
 
-  https-connection-service:
-    build: ./https-connection-service
-    container_name: https-connection-service
-    environment:
-      - KAFKA_BROKER=kafka:9092
-      - KAFKA_TOPIC=test_topic
-      - PORT=3002
-    ports:
-      - "3002:3002"
-    depends_on:
-      - kafka
+  # https-connection-service:
+  #   build: ./https-connection-service
+  #   container_name: https-connection-service
+  #   environment:
+  #     - KAFKA_BROKER=kafka:9092
+  #     - KAFKA_TOPIC=test_topic
+  #     - PORT=3002
+  #   ports:
+  #     - "3002:3002"
+  #   depends_on:
+  #     - kafka
 
-  kafka-consumer-service:
-    build: ./kafka-consumer-service
-    container_name: kafka-consumer-service
-    environment:
-      - KAFKA_BROKER=kafka:9092
-      - KAFKA_TOPIC=test_topic
-      - INFLUXDB_HOST=influxdb
-      - INFLUXDB_PORT=8086
-      - INFLUXDB_DB=test_db
-      - INFLUXDB_USER=username
-      - INFLUXDB_PASSWORD=password
-    ports:
-      - "3003:3003"
-    depends_on:
-      - kafka
-      - influxdb
+  # kafka-consumer-service:
+  #   build: ./kafka-consumer-service
+  #   container_name: kafka-consumer-service
+  #   environment:
+  #     - KAFKA_BROKER=kafka:9092
+  #     - KAFKA_TOPIC=test_topic
+  #     - INFLUXDB_HOST=influxdb
+  #     - INFLUXDB_PORT=8086
+  #     - INFLUXDB_DB=test_db
+  #     - INFLUXDB_USER=username
+  #     - INFLUXDB_PASSWORD=password
+  #   ports:
+  #     - "3003:3003"
+  #   depends_on:
+  #     - kafka
+  #     - influxdb
 
-  query-service:
-    build: ./query-service
-    container_name: query-service
-    environment:
-      - INFLUXDB_HOST=influxdb
-      - INFLUXDB_PORT=8086
-      - INFLUXDB_DB=test_db
-      - INFLUXDB_USER=username
-      - INFLUXDB_PASSWORD=password
-      - PORT=3004
-    ports:
-      - "3004:3004"
-    depends_on:
-      - influxdb
+  # query-service:
+  #   build: ./query-service
+  #   container_name: query-service
+  #   environment:
+  #     - INFLUXDB_HOST=influxdb
+  #     - INFLUXDB_PORT=8086
+  #     - INFLUXDB_DB=test_db
+  #     - INFLUXDB_USER=username
+  #     - INFLUXDB_PASSWORD=password
+  #     - PORT=3004
+  #   ports:
+  #     - "3004:3004"
+  #   depends_on:
+  #     - influxdb
 
   mongo:
     image: mongo:latest
@@ -107,14 +107,17 @@ services:
       - "2181:2181"
 
   influxdb:
-    image: influxdb:1.8
+    image: influxdb:2.7
     container_name: influxdb
     ports:
       - "8086:8086"
     environment:
-      INFLUXDB_ADMIN_USER: username
-      INFLUXDB_ADMIN_PASSWORD: password
-      INFLUXDB_DB: test_db
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: username
+      DOCKER_INFLUXDB_INIT_PASSWORD: password
+      DOCKER_INFLUXDB_INIT_ORG: my-org
+      DOCKER_INFLUXDB_INIT_BUCKET: test_db
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: my-influxdb-token
 
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
@@ -128,14 +131,14 @@ services:
     depends_on:
       - kafka
 
-  chronograf:
-    image: chronograf:1.8
-    container_name: chronograf
-    ports:
-      - "8888:8888"
-    depends_on:
-      - influxdb
-    environment:
-      INFLUXDB_URL: http://influxdb:8086
-      INFLUXDB_USERNAME: username
-      INFLUXDB_PASSWORD: password
+  # chronograf:
+  #   image: chronograf:1.8
+  #   container_name: chronograf
+  #   ports:
+  #     - "8888:8888"
+  #   depends_on:
+  #     - influxdb
+  #   environment:
+  #     INFLUXDB_URL: http://influxdb:8086
+  #     INFLUXDB_USERNAME: username
+  #     INFLUXDB_PASSWORD: password

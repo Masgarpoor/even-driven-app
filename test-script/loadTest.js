@@ -63,9 +63,9 @@ const sendRequest = async (url, data) => {
 
 const query = async () => {
   const startTime = "1403-04-23T01:00:00";
-  const endTime = "1403-04-23T02:00:00";
+  const endTime = "1403-04-24T02:00:00";
   const name = "temperature";
-  const connectionName = "connection_84";
+  const connectionName = "connection_1";
 
   try {
     const response = await axios.get(
@@ -92,7 +92,7 @@ const main = () => {
       const connectionParam = { parameters: generateParameters() };
       const requestData = generateRandomDate();
 
-      await sendRequest(connectionUrl, connectionParam);
+      // await sendRequest(connectionUrl, connectionParam);
       await sendRequest(dataUrl, requestData);
 
       // Adding delay between each connection request
@@ -101,5 +101,5 @@ const main = () => {
   }, RATE);
 };
 
-// main();
+main();
 // query();

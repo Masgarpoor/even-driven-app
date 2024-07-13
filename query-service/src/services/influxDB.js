@@ -1,23 +1,43 @@
-import Influx from "influx";
+import { InfluxDB } from "@influxdata/influxdb-client";
 
-const influx = new Influx.InfluxDB({
-  host: "influxdb",
-  port: "8086",
-  database: "test_db",
-  username: "username",
-  password: "password",
+const token = "my-influxdb-token";
+const org = "my-org";
+const bucket = "test_db";
+
+const influx = new InfluxDB({
+  url: "http://influxdb:8086",
+  token: token,
 });
 
 const queryData = async (startTime, endTime, name, connection_name) => {
-  // console.log(startTime);
-  // console.log(new Date(new Date(startTime).toISOString()).toLocaleString());
-  // console.log(endTime);
-  // console.log(new Date(new Date(endTime).toISOString()).toLocaleString());
-  // console.log(name);
-  const query = `SELECT "value", "name", "ts" FROM "test_db"."autogen"."data_measurement"
-                 WHERE "ts" >= ${startTime} AND "ts" < ${endTime} AND "name" = '${name}' AND "connection_name"='${connection_name}'`; // !! To enter the amount of time, we must use the single qute
-  const data = await influx.query(query);
-  return data;
+  const queryApi = influx.getQueryApi(org);
+  console.log(startTime);
+  console.log(endTime);
+  const query = `
+    from(bucket: "${bucket}")
+      |> range(start: ${startTime}, stop: ${endTime})
+      |> filter(fn: (r) => r._measurement == "data_measurement")
+      |> filter(fn: (r) => r._field == "value" or r._field == "name" or r._field == "ts")
+      |> filter(fn: (r) => r.name == "${name}" and r.connection_name == "${connection_name}")
+  `;
+
+
+  // const query = `from(bucket: "test_db")
+  // |> filter(fn: (r) => r["_measurement"] == "data_measurement")
+  // |> filter(fn: (r) => r["_field"] == "ts" or r["_field"] == "name")
+  // |> filter(fn: (r) => r["connection_name"] == "connection_1")
+  // |> filter(fn: (r) => r["tag"] == "received")`
+  try {
+    const data = [];
+    for await (const { values, tableMeta } of queryApi.iterateRows(query)) {
+      const o = tableMeta.toObject(values);
+      data.push(o);
+    }
+    return data;
+  } catch (error) {
+    console.error("Error querying data:", error);
+    throw error;
+  }
 };
 
 export default queryData;

@@ -1,38 +1,47 @@
-import Influx from "influx";
+import { InfluxDB, Point } from "@influxdata/influxdb-client";
 
-const influx = new Influx.InfluxDB({
-  host: "influxdb",
-  port: 8086,
-  database: "test_db",
-  username: "username",
-  password: "password",
-  schema: [
-    {
-      measurement: "data_measurement",
-      fields: {
-        value: Influx.FieldType.FLOAT,
-        name: Influx.FieldType.STRING,
-        ts: Influx.FieldType.INTEGER,
-      },
-      tags: ["connection_name", "tag"], // Tags used for indexing and querying
-    },
-  ],
+const token = "my-influxdb-token";
+const org = "my-org";
+const bucket = "test_db";
+
+const influxDB = new InfluxDB({
+  url: "http://influxdb:8086",
+  token: token,
 });
 
-export default function writeDataToInflux(data) {
+const writeApi = influxDB.getWriteApi(org, bucket);
+
+writeApi.useDefaultTags({ location: "server" });
+
+export default async function writeDataToInflux(data) {
   try {
     const numericValue = parseFloat(data.value);
+
     if (isNaN(numericValue)) {
-      throw (`Invalid value for field 'value': ${data.value}`);
+      throw new Error(`Invalid value for field 'value': ${data.value}`);
     }
-    return influx.writePoints([
-      {
-        measurement: "data_measurement",
-        tags: { connection_name: data.connection_name, tag: data.tag },
-        fields: { value: numericValue, name: data.name, ts: data.ts },
-      },
-    ]);
+
+    const point = new Point("data_measurement")
+      .floatField("value", numericValue)
+      .stringField("name", data.name)
+      .timestamp(new Date(data.ts))  // Ensure timestamp is in Date format
+      .tag("connection_name", data.connection_name)
+      .tag("tag", data.tag);
+
+    writeApi.writePoint(point);
+    console.log("Data point written to InfluxDB:", point);
   } catch (error) {
     console.error("Failed to write data to InfluxDB:", error);
   }
 }
+
+process.on('SIGINT', async () => {
+  try {
+    await writeApi.close();
+    console.log("writeApi closed successfully");
+  } catch (error) {
+    console.error("Error closing writeApi:", error);
+  } finally {
+    process.exit();
+  }
+});

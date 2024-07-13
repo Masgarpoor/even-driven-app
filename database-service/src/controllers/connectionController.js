@@ -125,6 +125,7 @@ export default class ConnectionController {
 
       if (deletedConnection) {
         await session.commitTransaction();
+        
         res.status(200).json({
           success: true,
           body: deletedConnection,
