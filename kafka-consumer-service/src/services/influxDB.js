@@ -2,17 +2,24 @@ import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import chalk from "chalk";
 
 // Configuration for InfluxDB 2.x
+// const url = "http://localhost:8086";
+// const token =
+//   "JxyWwQs-QmWPCAnuBKVP-v_4t3BgHv9Zuj-dKl7YyqU9ijKgel_DnzNkBNw_qRifQpQlLycGPXcS1MyAAr46yg==";
+// const org = "my-org";
+// const bucket = "test-bucket";
+
+// Configuration for InfluxDB cloud
+const url = "https://us-east-1-1.aws.cloud2.influxdata.com"
 const token =
-  "C2e4JrRI4RhilIwFWKzqshVFT7sSF8prHJ4x5Dloh9TRSaj-Mo9H9D1DCdZw97cdKgzFYtNieUaGRfcdGKvAjQ==";
-const org = "my-org";
+  "Eonwt18jFJ7HZF4T4w4k80pChfihtOPMUZg5JsIqx8sXXvJb4H27oEaPW30LRDzskyFKXtpJWTOIJZujSncWGQ==";
+const org = "my-org"
 const bucket = "test-bucket";
 
-const influxDB = new InfluxDB({
-  url: "http://localhost:8086",
-  token: token,
-});
 
+
+const influxDB = new InfluxDB({ url, token });
 const writeApi = influxDB.getWriteApi(org, bucket);
+
 writeApi.useDefaultTags({ location: "consumer-server" });
 
 // Function to write data to InfluxDB
@@ -46,7 +53,7 @@ export default async function writeDataToInflux(data) {
 // Properly handle the closing of writeApi when the process exits
 process.on("SIGINT", async () => {
   try {
-    await writeApi.close();
+    await writeApi.close(); // Ensure all data is written
     console.log("writeApi closed successfully");
   } catch (error) {
     console.error("Error closing writeApi:", error);

@@ -13,7 +13,7 @@ consumer.on(consumer.events.CONNECT, () => {
   console.log("Kafka Consumer connected to kafka");
 });
 
-consumer.on(consumer.events.FETCH_START, () => {
+consumer.on(consumer.events.FETCH, () => {
   console.log("Consumer fetche start... ");
 });
 
@@ -21,6 +21,8 @@ async function connectConsumer() {
   try {
     await consumer.connect();
     await consumer.subscribe({ topic: KAFKA_TOPIC, fromBeginning: true });
+
+    // console.log('Consumer fetch started...');
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {

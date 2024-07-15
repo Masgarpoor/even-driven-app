@@ -3,12 +3,14 @@ import addJobToQueue from "../queue.js";
 // const DATABASE_SERVICE_URI = "http://database-service:3001/api";
 // const HTTPS_CONNECTIONS_URI = "http://https-connection-service:3002/api";
 // const QUERY_SERVICE_URI = "http://query-service:3004/api";
-// const DATABASE_SERVICE_URI = "http://localhost:3001/api";
-// const HTTPS_CONNECTIONS_URI = "http://localhost:3002/api";
+const DATABASE_SERVICE_URL =
+  process.env.DATABASE_SERVICE_URL || "http://localhost:3001";
 
-// process.env.DATABASE_SERVICE_URL
-// process.env.HTTPS_CONNECTION_SERVICE_URL
-// process.env.QUERY_SERVICE_URL
+const HTTPS_CONNECTIONS_SERVICE_URL =
+  process.env.HTTPS_CONNECTION_SERVICE_URL || "http://localhost:3002";
+  
+const QUERY_SERVICE_URL =
+  process.env.QUERY_SERVICE_URL || "http://localhost:3004";
 
 export default class RequestController {
   // database-service
@@ -16,7 +18,7 @@ export default class RequestController {
     try {
       const jobData = {
         method: req.method,
-        url: `${process.env.DATABASE_SERVICE_URL}/api${req.url}`,
+        url: `${DATABASE_SERVICE_URL}/api${req.url}`,
         data: req.body,
       };
       console.log("Job data is:", jobData);
@@ -33,12 +35,12 @@ export default class RequestController {
     try {
       const jobData = {
         method: req.method,
-        url: `${process.env.HTTPS_CONNECTION_SERVICE_URL}/api${req.url}`,
+        url: `${HTTPS_CONNECTIONS_SERVICE_URL}/api${req.url}`,
         data: req.body,
       };
       console.log("Job data is:", jobData);
-
       const result = await addJobToQueue(jobData);
+      
       res.status(200).json(result);
     } catch (error) {
       RequestController.handleRequestError(error, res);
@@ -53,7 +55,7 @@ export default class RequestController {
 
       const jobData = {
         method: req.method,
-        url: `${process.env.QUERY_SERVICE_URL}/api/${connection_name}/data?${query}`,
+        url: `${QUERY_SERVICE_URL}/api/${connection_name}/data?${query}`,
         data: req.body,
       };
       console.log("Job data is:", jobData);
@@ -87,7 +89,6 @@ export default class RequestController {
     }
   }
 }
-
 
 // export default class RequestController {
 //   // database-servicev
