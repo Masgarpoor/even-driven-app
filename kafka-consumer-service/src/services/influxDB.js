@@ -1,30 +1,38 @@
 import { InfluxDB, Point } from "@influxdata/influxdb-client";
+import chalk from "chalk";
 
-const token = "my-influxdb-token";
+// Configuration for InfluxDB 2.x
+const token =
+  "C2e4JrRI4RhilIwFWKzqshVFT7sSF8prHJ4x5Dloh9TRSaj-Mo9H9D1DCdZw97cdKgzFYtNieUaGRfcdGKvAjQ==";
 const org = "my-org";
-const bucket = "test_db";
+const bucket = "test-bucket";
 
 const influxDB = new InfluxDB({
-  url: "http://influxdb:8086",
+  url: "http://localhost:8086",
   token: token,
 });
 
 const writeApi = influxDB.getWriteApi(org, bucket);
+writeApi.useDefaultTags({ location: "consumer-server" });
 
-writeApi.useDefaultTags({ location: "server" });
-
+// Function to write data to InfluxDB
 export default async function writeDataToInflux(data) {
   try {
     const numericValue = parseFloat(data.value);
-
     if (isNaN(numericValue)) {
       throw new Error(`Invalid value for field 'value': ${data.value}`);
+    }
+
+    // Convert timestamp from milliseconds to nanoseconds
+    const nanosecondTimestamp = parseInt(data.ts) * 1000000;
+    if (isNaN(nanosecondTimestamp)) {
+      throw new Error(`Invalid value for field 'ts': ${data.ts}`);
     }
 
     const point = new Point("data_measurement")
       .floatField("value", numericValue)
       .stringField("name", data.name)
-      .timestamp(new Date(data.ts))  // Ensure timestamp is in Date format
+      .timestamp(nanosecondTimestamp)
       .tag("connection_name", data.connection_name)
       .tag("tag", data.tag);
 
@@ -35,7 +43,8 @@ export default async function writeDataToInflux(data) {
   }
 }
 
-process.on('SIGINT', async () => {
+// Properly handle the closing of writeApi when the process exits
+process.on("SIGINT", async () => {
   try {
     await writeApi.close();
     console.log("writeApi closed successfully");

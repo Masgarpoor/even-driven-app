@@ -3,17 +3,24 @@ import { Kafka } from "kafkajs";
 import writeDataToInflux from "./influxDB.js";
 
 const CLIENT = "kafka-consumer-service";
-const KAFKA_BROKER = process.env.KAFKA_BROKER || "kafka:9092";
+const KAFKA_BROKER = process.env.KAFKA_BROKER || "localhost:9092";
+const KAFKA_TOPIC = process.env.KAFKA_TOPIC || "test";
 
 const kafka = new Kafka({ CLIENT, brokers: [KAFKA_BROKER] });
 const consumer = kafka.consumer({ groupId: "my-group" });
 
+consumer.on(consumer.events.CONNECT, () => {
+  console.log("Kafka Consumer connected to kafka");
+});
+
+consumer.on(consumer.events.FETCH_START, () => {
+  console.log("Consumer fetche start... ");
+});
+
 async function connectConsumer() {
   try {
-    const KAFKA_TOPIC = process.env.KAFKA_TOPIC || "test_topic";
     await consumer.connect();
     await consumer.subscribe({ topic: KAFKA_TOPIC, fromBeginning: true });
-    console.log("Kafka Consumer connected to kafka");
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {

@@ -1,11 +1,14 @@
-import { Kafka } from "kafkajs";
+import { Kafka, Partitioners } from "kafkajs";
 import { v4 as uuidv4 } from "uuid";
 
 const CLIENT = process.env.CLIENT || "https-connection-service";
-const KAFKA_BROKER = process.env.KAFKA_BROKER || "kafka:9092";
+const KAFKA_BROKER = process.env.KAFKA_BROKER || "localhost:9092";
+const topic = process.env.KAFKA_TOPIC || "test";
 
 const kafka = new Kafka({ clientId: CLIENT, brokers: [KAFKA_BROKER] });
-const producer = kafka.producer();
+const producer = kafka.producer({
+  createPartitioner: Partitioners.LegacyPartitioner,
+});
 
 try {
   await producer.connect();
@@ -16,7 +19,6 @@ try {
 
 export async function sendDataToKafka(data) {
   try {
-    const topic = process.env.KAFKA_TOPIC || "test_topic";
     const messages = [
       {
         key: uuidv4(),
