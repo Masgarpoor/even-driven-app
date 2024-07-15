@@ -12,7 +12,7 @@ app.use("/api/connections", connectionRouter);
 
 mongoose
   .connect(
-    `mongodb://localhost:27017/connections_db?replicaSet=rs0`
+    `mongodb://localhost:2717,localhost:2727,localhost:2737/connections_db?replicaSet=rs0`
   )
   .then(() => {
     console.log("Connected to MongoDB");
