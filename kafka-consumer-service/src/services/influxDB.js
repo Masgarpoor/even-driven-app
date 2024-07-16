@@ -2,18 +2,18 @@ import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import chalk from "chalk";
 
 // Configuration for InfluxDB 2.x
-// const url = "http://localhost:8086";
-// const token =
-//   "JxyWwQs-QmWPCAnuBKVP-v_4t3BgHv9Zuj-dKl7YyqU9ijKgel_DnzNkBNw_qRifQpQlLycGPXcS1MyAAr46yg==";
-// const org = "my-org";
-// const bucket = "test-bucket";
+const url = "http://localhost:8086";
+const token =
+  "MV-W55fIYX_bCgnzdyScGdl5XWzinuVjuxSfNNQ_hWarlv-HxTswokCC3kvAk89eKkeJViPbG0IX4MTe9GEDdA==";
+const org = "my-org";
+const bucket = "test-bucket";
 
 // Configuration for InfluxDB cloud
-const url = "https://us-east-1-1.aws.cloud2.influxdata.com"
-const token =
-  "Eonwt18jFJ7HZF4T4w4k80pChfihtOPMUZg5JsIqx8sXXvJb4H27oEaPW30LRDzskyFKXtpJWTOIJZujSncWGQ==";
-const org = "my-org"
-const bucket = "test-bucket";
+// const url = "https://us-east-1-1.aws.cloud2.influxdata.com"
+// const token =
+//   "Eonwt18jFJ7HZF4T4w4k80pChfihtOPMUZg5JsIqx8sXXvJb4H27oEaPW30LRDzskyFKXtpJWTOIJZujSncWGQ==";
+// const org = "my-org"
+// const bucket = "test-bucket";
 
 
 

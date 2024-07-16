@@ -92,7 +92,7 @@ const main = () => {
       const connectionParam = { parameters: generateParameters() };
       const requestData = generateRandomDate();
 
-      await sendRequest(connectionUrl, connectionParam);
+      // await sendRequest(connectionUrl, connectionParam);
       await sendRequest(dataUrl, requestData);
 
       // Adding delay between each connection request
