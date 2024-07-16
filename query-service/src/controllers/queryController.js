@@ -9,14 +9,11 @@ export default class QueryController {
       const { connection_name } = req.params;
       let { startTime, endTime, name } = req.query;
 
-      // startTime = convertDateToTimestamp(convertDateToUTC(startTime));1720868218918
-      // endTime = convertDateToTimestamp(convertDateToUTC(endTime));1720868339420
-      startTime = 1720868814023;
-      endTime = 1720868339420;
-      connection_name = "connection_77";
-      name = "temperature";
+      startTime = convertDateToTimestamp(convertDateToUTC(startTime));
+      endTime = convertDateToTimestamp(convertDateToUTC(endTime));
 
       const data = await queryData(startTime, endTime, name, connection_name);
+      console.table(data);
       if (data.length) {
         res.status(200).json({
           success: true,
@@ -37,5 +34,3 @@ export default class QueryController {
     }
   }
 }
-
-console.log(Date.now());

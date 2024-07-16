@@ -1,43 +1,90 @@
 import { InfluxDB } from "@influxdata/influxdb-client";
 
-const token = "my-influxdb-token";
+// Configuration for InfluxDB 2.x
+const url = "http://localhost:8086";
+const token =
+  "MV-W55fIYX_bCgnzdyScGdl5XWzinuVjuxSfNNQ_hWarlv-HxTswokCC3kvAk89eKkeJViPbG0IX4MTe9GEDdA==";
 const org = "my-org";
-const bucket = "test_db";
+const bucket = "test-bucket";
 
-const influx = new InfluxDB({
-  url: "http://influxdb:8086",
-  token: token,
-});
+const influxDB = new InfluxDB({ url, token });
+
+// const queryData = async (startTime, endTime, name, connection_name) => {
+//   const queryApi = influxDB.getQueryApi(org);
+//   const startTimeNanosecond = startTime * 1e6;
+//   const endTimeNanosecond = endTime * 1e6;
+
+//   console.log(startTime, "-->", startTimeNanosecond);
+//   console.log(endTime, "-->", endTimeNanosecond);
+
+//   let fluxQuery = `
+//     from(bucket: "${bucket}")
+//       |> range(start: ${startTimeNanosecond}, stop: ${endTimeNanosecond})
+//       |> filter(fn: (r) => r._measurement == "data_measurement")
+
+//   `;
+
+//   // |> sort(columns: ["_time"])
+//   // |> range(start: ${startTimeNanosecond}, stop: ${endTimeNanosecond})
+//   // |> filter(fn: (r) => r.connection_name == "${connection_name}")
+//   let data = [];
+//   await new Promise((resolve, reject) => {
+//     queryApi.queryRows(fluxQuery, {
+//       next: (row, tableMeta) => {
+//         const tableObject = tableMeta.toObject(row);
+//         data.push(tableObject);
+//       },
+//       error: (error) => {
+//         console.error("\nError querying data:", error);
+//         reject(error);
+//       },
+//       complete: () => {
+//         console.log("\nSuccess");
+//         resolve();
+//       },
+//     });
+//   });
+
+//   return data;
+// };
 
 const queryData = async (startTime, endTime, name, connection_name) => {
-  const queryApi = influx.getQueryApi(org);
-  console.log(startTime);
-  console.log(endTime);
-  const query = `
+  const queryApi = influxDB.getQueryApi(org);
+  const startTimeNanosecond = startTime * 1e6;
+  const endTimeNanosecond = endTime * 1e6;
+
+  let fluxQuery = `
     from(bucket: "${bucket}")
-      |> range(start: ${startTime}, stop: ${endTime})
+      |> range(start: ${startTimeNanosecond}, stop: ${endTimeNanosecond})
       |> filter(fn: (r) => r._measurement == "data_measurement")
-      |> filter(fn: (r) => r._field == "value" or r._field == "name" or r._field == "ts")
-      |> filter(fn: (r) => r.name == "${name}" and r.connection_name == "${connection_name}")
+      |> filter(fn: (r) => r.connection_name == "${connection_name}")
+      |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
   `;
 
+  let data = [];
+  await new Promise((resolve, reject) => {
+    queryApi.queryRows(fluxQuery, {
+      next: (row, tableMeta) => {
+        const tableObject = tableMeta.toObject(row);
+        data.push({
+          name: tableObject.name,
+          value: tableObject.value,
+          connection_name: tableObject.connection_name,
+          time: tableObject._time,
+        });
+      },
+      error: (error) => {
+        console.error("\nError querying data:", error);
+        reject(error);
+      },
+      complete: () => {
+        console.log("\nSuccess");
+        resolve();
+      },
+    });
+  });
 
-  // const query = `from(bucket: "test_db")
-  // |> filter(fn: (r) => r["_measurement"] == "data_measurement")
-  // |> filter(fn: (r) => r["_field"] == "ts" or r["_field"] == "name")
-  // |> filter(fn: (r) => r["connection_name"] == "connection_1")
-  // |> filter(fn: (r) => r["tag"] == "received")`
-  try {
-    const data = [];
-    for await (const { values, tableMeta } of queryApi.iterateRows(query)) {
-      const o = tableMeta.toObject(values);
-      data.push(o);
-    }
-    return data;
-  } catch (error) {
-    console.error("Error querying data:", error);
-    throw error;
-  }
+  return data;
 };
 
 export default queryData;

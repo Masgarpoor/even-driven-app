@@ -18,7 +18,7 @@ const bucket = "test-bucket";
 
 
 const influxDB = new InfluxDB({ url, token });
-const writeApi = influxDB.getWriteApi(org, bucket, 'ms');
+const writeApi = influxDB.getWriteApi(org, bucket);
 
 writeApi.useDefaultTags({ location: "consumer-server" });
 
@@ -30,15 +30,16 @@ export default async function writeDataToInflux(data) {
       throw new Error(`Invalid value for field 'value': ${data.value}`);
     }
 
-    const milisecondTimestamp = parseInt(data.ts);
-    if (isNaN(milisecondTimestamp)) {
+    // Convert timestamp from milliseconds to nanoseconds
+    const nanosecondTimestamp = parseInt(data.ts) * 1e6;
+    if (isNaN(nanosecondTimestamp)) {
       throw new Error(`Invalid value for field 'ts': ${data.ts}`);
     }
 
     const point = new Point("data_measurement")
       .floatField("value", numericValue)
       .stringField("name", data.name)
-      .timestamp(milisecondTimestamp)
+      .timestamp(nanosecondTimestamp)
       .tag("connection_name", data.connection_name)
       .tag("tag", data.tag);
 
