@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
-import Connection from "../models/connectionModel.js";
+import axios from "axios";
+import path from "path";
 
+import Connection from "../models/connectionModel.js";
 export default class ConnectionController {
   // Create new Connection
   static async createConnection(req, res) {
@@ -59,7 +61,8 @@ export default class ConnectionController {
       if (!new_connection_name || !parameters) {
         throw {
           status: 400,
-          message: "Invalid request parameters: Please send new connection name and parameters",
+          message:
+            "Invalid request parameters: Please send new connection name and parameters",
         };
       }
 
@@ -115,22 +118,33 @@ export default class ConnectionController {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
+      const QUERY_SERVICE_URL =
+        process.env.QUERY_SERVICE_URL || "http://localhost:3004";
+
       const { connection_name } = req.params;
       const deletedConnection = await Connection.findOneAndDelete(
         { connection_name },
-        {
-          new: true,
-        }
+        { new: true }
       ).session(session);
 
       if (deletedConnection) {
-        await session.commitTransaction();
-        
-        res.status(200).json({
-          success: true,
-          body: deletedConnection,
-          message: "Connection deleted.",
-        });
+        const deleteDatas = await axios.delete(
+          `${QUERY_SERVICE_URL}/api/${connection_name}/data`
+        );
+        console.log(deleteDatas);
+        if (deleteDatas.data.success) {
+          await session.commitTransaction();
+          res.status(200).json({
+            success: true,
+            body: deletedConnection,
+            message: "Connection and connection data are deleted",
+          });
+        } else {
+          throw {
+            status: 500,
+            message: "Error deleting connection data",
+          };
+        }
       } else {
         throw {
           status: 404,
@@ -140,7 +154,7 @@ export default class ConnectionController {
     } catch (error) {
       await session.abortTransaction();
       const status = error.status || 500;
-      const message = error.message || "Interval server error";
+      const message = error || "Internal server error";
       console.log("Error deleting connection:", message);
 
       res.status(status).json({

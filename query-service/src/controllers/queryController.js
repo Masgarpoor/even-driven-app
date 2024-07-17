@@ -1,4 +1,4 @@
-import queryData from "../services/influxDB.js";
+import { queryData, deleteData } from "../services/influxDB.js";
 import {
   convertDateToTimestamp,
   convertDateToUTC,
@@ -26,6 +26,23 @@ export default class QueryController {
           message: "Data not found",
         });
       }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  static async deleteDatas(req, res) {
+    const { connection_name } = req.params;
+    try {
+      await deleteData(connection_name);
+      console.log(`All data from ${connection_name} deleted`);
+      res.status(200).json({
+        success: true,
+        message: `All data from ${connection_name} deleted`,
+      });
     } catch (error) {
       res.status(500).json({
         success: false,
